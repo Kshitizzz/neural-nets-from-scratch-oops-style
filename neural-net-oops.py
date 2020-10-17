@@ -32,12 +32,29 @@ class SoftMax:
 	# Forward pass method to accept inputs from the final hidden layer, and normalize them:
 	def forward_pass(self, inputs):
 		# unnormalized probabilites (numerator of the softmax function)
+		# subtracting the max value to avoid exploding values after exponentiation
 		exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims= True))
 		# normalizing each of the individula value in the numerator:
 		probabilities = exp_values/np.sum(exp_values, axis= 1, keepdims= True)
 		# output probabilities/decisions:
 		self.output = probabilities
 
+# Implementing a Cross Entropy Loss for Categorical and one-hot target variable:
+class LossCrossEntropyCategorical:
+	# Forward pass method for loss method, to calculate loss between predicted and actual labels
+	def forward_pass(self, y_actual, y_pred):
+		# Clipping predicted values by a small values on both sides to avoid divison by zero (log(0)) error
+		y_pred = np.clip(y_pred, 1e-7, 1-(1e-7))
+		# Checking if y_actual is one-hot encoded:
+		if len(y_actual.shape) == 2: 
+			actual_labels = np.argmax(y_actual, axis= 1)
+			correct_confidences = y_pred[range(len(y_actual)), actual_labels]
+		# if y_actual is categorical:
+		elif len(y_actual.shape) == 1:
+			correct_confidences = y_pred[range(len(y_actual)), y_actual]
+		# Calculating loss:
+		negative_log_likelihood = -np.log(correct_confidences)
+		return negative_log_likelihood
 
 
 # Dataset
@@ -58,4 +75,7 @@ activation1.forward_pass(layer1.output)
 layer2.forward_pass(activation1.output)
 activation2.forward_pass(layer2.output)
 
-print(activation2.output[:5])
+# loss-layer:
+cross_entropy_loss = LossCrossEntropyCategorical()
+loss = cross_entropy_loss.forward_pass(y, activation2.output)
+print(loss)
