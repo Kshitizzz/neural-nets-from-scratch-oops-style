@@ -56,6 +56,13 @@ class LossCrossEntropyCategorical:
 		negative_log_likelihood = -np.log(correct_confidences)
 		return negative_log_likelihood
 
+# Implementing a method to calculate Accuracy:
+
+def calculate_accuracy(y_actual, y_pred):
+	if len(y_actual.shape) == 2:
+		y_actual = np.argmax(y_actual, axis= 1)
+	y_pred = np.argmax(y_pred, axis= 1)
+	return np.mean(y_actual == y_pred)
 
 # Dataset
 X, y = spiral_data(samples=100, classes=3)
@@ -78,4 +85,6 @@ activation2.forward_pass(layer2.output)
 # loss-layer:
 cross_entropy_loss = LossCrossEntropyCategorical()
 loss = cross_entropy_loss.forward_pass(y, activation2.output)
-print(loss)
+print(loss[:10])
+accu = calculate_accuracy(y, activation2.output)
+print(accu)
